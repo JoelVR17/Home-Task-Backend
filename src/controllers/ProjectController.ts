@@ -9,7 +9,7 @@ export class ProjectController {
       await project.save();
       res.send("The project was successfully created");
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ error: "Error" });
     }
   };
 
@@ -18,7 +18,7 @@ export class ProjectController {
       const projects = await Project.find({});
       res.json(projects);
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ error: "Error" });
     }
   };
 
@@ -34,7 +34,7 @@ export class ProjectController {
 
       res.json(project);
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ error: "Error" });
     }
   };
 
@@ -42,18 +42,22 @@ export class ProjectController {
     const { id } = req.params;
 
     try {
-      const project = await Project.findByIdAndUpdate(id, req.body);
+      const project = await Project.findById(id);
 
       if (!project) {
         const error = new Error("Project not found");
         return res.status(404).json({ error: error.message });
       }
 
+      project.clientName = req.body.clientName;
+      project.projectName = req.body.projectName;
+      project.description = req.body.description;
+
       await project.save();
 
       res.send("The project was successfully updated");
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ error: "Error" });
     }
   };
 
@@ -72,7 +76,7 @@ export class ProjectController {
 
       res.send("The project was successfully deleted");
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ error: "Error" });
     }
   };
 }
