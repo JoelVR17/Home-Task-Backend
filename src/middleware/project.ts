@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export const validateProjectExists = async (
+export const projectExists = async (
   req: Request,
   res: Response,
   next: NextFunction
