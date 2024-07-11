@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import User from "../models/User";
-import { hasPassword } from "../utils/auth";
+import { checkPassword, hashPassword } from "../utils/auth";
 import Token from "../models/Token";
 import { generate6digitToken } from "../utils/token";
 import { transport } from "../config/nodemailer";
@@ -20,7 +20,7 @@ export class AuthController {
       }
 
       // Hash password and create an User
-      user.password = await hasPassword(password);
+      user.password = await hashPassword(password);
 
       // Generate token
       const token = new Token();
@@ -30,7 +30,7 @@ export class AuthController {
       // Send email
       AuthEmail.sendConfirmationEmail({
         email: user.email,
-        name: user.email,
+        name: user.name,
         token: token.token,
       });
 
@@ -49,7 +49,7 @@ export class AuthController {
 
       if (!tokenExist) {
         const error = new Error("Invalid Token");
-        return res.status(401).json({ error: error.message });
+        return res.status(404).json({ error: error.message });
       }
 
       const user = await User.findById(tokenExist.user);
@@ -57,6 +57,53 @@ export class AuthController {
 
       await Promise.allSettled([user.save(), tokenExist.deleteOne()]);
       res.send("Account Confirmed Successfully");
+    } catch (error) {
+      res.status(500).json({ error: "Error" });
+    }
+  };
+
+  static login = async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      const user = await User.findOne({ email });
+
+      // User exist
+      if (!user) {
+        const error = new Error("User Not Found");
+        return res.status(404).json({ error: error.message });
+      }
+
+      // Is confirmed user
+      if (!user.confirmed) {
+        const token = new Token();
+        token.user = user.id;
+        token.token = generate6digitToken();
+
+        await token.save();
+
+        // Send email
+        AuthEmail.sendConfirmationEmail({
+          email: user.email,
+          name: user.name,
+          token: token.token,
+        });
+
+        const error = new Error(
+          "User Not Confirmed, we have sent a confirmation email"
+        );
+        return res.status(401).json({ error: error.message });
+      }
+
+      // Check password
+      const isCorrectPassword = await checkPassword(password, user.password);
+
+      if (!isCorrectPassword) {
+        const error = new Error("Incorrect Email or Password");
+        return res.status(401).json({ error: error.message });
+      }
+
+      res.send("Auth");
     } catch (error) {
       res.status(500).json({ error: "Error" });
     }
