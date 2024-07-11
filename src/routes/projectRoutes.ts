@@ -15,9 +15,9 @@ const router = Router();
 // Create
 router.post(
   "/",
-  body("projectName").notEmpty().withMessage("The project name is required"),
-  body("clientName").notEmpty().withMessage("The client name is required"),
-  body("description").notEmpty().withMessage("The description is required"),
+  body("projectName").notEmpty().withMessage("Project name is required"),
+  body("clientName").notEmpty().withMessage("Client name is required"),
+  body("description").notEmpty().withMessage("Project description is required"),
 
   handleInputErrors,
   ProjectController.createProject
@@ -38,9 +38,9 @@ router.get(
 router.put(
   "/:id",
   param("id").isMongoId().withMessage("Invalid ID"),
-  body("projectName").notEmpty().withMessage("The project name is required"),
-  body("clientName").notEmpty().withMessage("The client name is required"),
-  body("description").notEmpty().withMessage("The description is required"),
+  body("projectName").notEmpty().withMessage("Project name is required"),
+  body("clientName").notEmpty().withMessage("Client name is required"),
+  body("description").notEmpty().withMessage("Project description is required"),
   handleInputErrors,
   ProjectController.updateProject
 );
@@ -64,8 +64,8 @@ router.param("taskId", taskBelongsToProject);
 // Create
 router.post(
   "/:projectId/tasks",
-  body("taskName").notEmpty().withMessage("The task name is required"),
-  body("description").notEmpty().withMessage("The description is required"),
+  body("taskName").notEmpty().withMessage("Task name is required"),
+  body("description").notEmpty().withMessage("Description is required"),
   handleInputErrors,
   TaskController.createTask
 );
@@ -85,8 +85,8 @@ router.get(
 router.put(
   "/:projectId/tasks/:taskId",
   param("taskId").isMongoId().withMessage("Invalid ID"),
-  body("taskName").notEmpty().withMessage("The task name is required"),
-  body("description").notEmpty().withMessage("The description is required"),
+  body("taskName").notEmpty().withMessage("Task name is required"),
+  body("description").notEmpty().withMessage("Description is required"),
   handleInputErrors,
   TaskController.updateTask
 );
@@ -103,7 +103,7 @@ router.delete(
 router.post(
   "/:projectId/tasks/:taskId/status",
   param("taskId").isMongoId().withMessage("Invalid ID"),
-  body("status").notEmpty().withMessage("The status is required"),
+  body("status").notEmpty().withMessage("Status is required"),
   handleInputErrors,
   TaskController.updateStatus
 );
