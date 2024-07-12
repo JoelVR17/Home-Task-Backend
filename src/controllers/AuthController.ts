@@ -176,4 +176,44 @@ export class AuthController {
       res.status(500).json({ error: "Error" });
     }
   };
+
+  static validateToken = async (req: Request, res: Response) => {
+    try {
+      const { token } = req.body;
+      const tokenExist = await Token.findOne({ token });
+
+      if (!tokenExist) {
+        const error = new Error("Invalid Token");
+        return res.status(404).json({ error: error.message });
+      }
+
+      res.send("Valid Token, change your password");
+    } catch (error) {
+      res.status(500).json({ error: "Error" });
+    }
+  };
+
+  static updatePassword = async (req: Request, res: Response) => {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+      const tokenExist = await Token.findOne({ token });
+
+      if (!tokenExist) {
+        const error = new Error("Invalid Token");
+        return res.status(404).json({ error: error.message });
+      }
+
+      const user = await User.findById(tokenExist.user);
+      user.password = await hashPassword(password);
+
+      console.log(user);
+
+      await Promise.allSettled([user.save(), tokenExist.deleteOne()]);
+
+      res.send("Password updated successfully");
+    } catch (error) {
+      res.status(500).json({ error: "Error" });
+    }
+  };
 }
