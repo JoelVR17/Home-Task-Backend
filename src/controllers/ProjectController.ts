@@ -5,6 +5,11 @@ export class ProjectController {
   static createProject = async (req: Request, res: Response) => {
     const project = new Project(req.body);
 
+    // Asign Manager
+    project.manager = req.user.id;
+
+    console.log(project);
+
     try {
       await project.save();
       res.send("The project was successfully created");
@@ -15,7 +20,9 @@ export class ProjectController {
 
   static getAllProjects = async (req: Request, res: Response) => {
     try {
-      const projects = await Project.find({});
+      const projects = await Project.find({
+        $or: [{ manager: { $in: req.user.id } }],
+      });
       res.json(projects);
     } catch (error) {
       res.status(500).json({ error: "Error" });
@@ -28,6 +35,11 @@ export class ProjectController {
       const project = await Project.findById(id).populate("tasks");
 
       if (!project) {
+        const error = new Error("Project not found");
+        return res.status(404).json({ error: error.message });
+      }
+
+      if (project.manager.toString() !== req.user.id.toString()) {
         const error = new Error("Project not found");
         return res.status(404).json({ error: error.message });
       }
@@ -46,6 +58,11 @@ export class ProjectController {
 
       if (!project) {
         const error = new Error("Project not found");
+        return res.status(404).json({ error: error.message });
+      }
+
+      if (project.manager.toString() !== req.user.id.toString()) {
+        const error = new Error("Only the manager can update this project");
         return res.status(404).json({ error: error.message });
       }
 
@@ -69,6 +86,11 @@ export class ProjectController {
 
       if (!project) {
         const error = new Error("Project not found");
+        return res.status(404).json({ error: error.message });
+      }
+
+      if (project.manager.toString() !== req.user.id.toString()) {
+        const error = new Error("Only the manager can delete this project");
         return res.status(404).json({ error: error.message });
       }
 
