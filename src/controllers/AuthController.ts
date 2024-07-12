@@ -5,6 +5,7 @@ import Token from "../models/Token";
 import { generate6digitToken } from "../utils/token";
 import { transport } from "../config/nodemailer";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
 
 export class AuthController {
   static createAccount = async (req: Request, res: Response) => {
@@ -104,7 +105,8 @@ export class AuthController {
         return res.status(401).json({ error: error.message });
       }
 
-      res.send("Auth");
+      const token = generateJWT({ id: user.id });
+      res.send(token);
     } catch (error) {
       res.status(500).json({ error: "Error" });
     }
@@ -206,8 +208,6 @@ export class AuthController {
 
       const user = await User.findById(tokenExist.user);
       user.password = await hashPassword(password);
-
-      console.log(user);
 
       await Promise.allSettled([user.save(), tokenExist.deleteOne()]);
 
