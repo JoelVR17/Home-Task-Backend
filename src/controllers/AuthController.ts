@@ -3,7 +3,6 @@ import User from "../models/User";
 import { checkPassword, hashPassword } from "../utils/auth";
 import Token from "../models/Token";
 import { generate6digitToken } from "../utils/token";
-import { transport } from "../config/nodemailer";
 import { AuthEmail } from "../emails/AuthEmail";
 import { generateJWT } from "../utils/jwt";
 
