@@ -89,7 +89,7 @@ export class TaskController {
 
       await req.task.save();
 
-      res.send("The task was successfully update");
+      res.send("The task was successfully updated");
     } catch (error) {
       res.status(500).json({ error: "Error" });
     }
